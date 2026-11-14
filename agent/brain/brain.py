@@ -3,6 +3,7 @@ import ctypes
 import json
 import os
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -30,6 +31,22 @@ def error_text(code):
     return os.strerror(code)
 
 
+def get_uptime_seconds():
+    """Возвращает время работы системы в секундах (только Windows)."""
+    if sys.platform == "win32":
+        # GetTickCount64() возвращает миллисекунды с загрузки системы
+        kernel32 = ctypes.windll.kernel32
+        ms = kernel32.GetTickCount64()
+        return ms // 1000
+    else:
+        # Для Linux/macOS читаем /proc/uptime
+        try:
+            with open("/proc/uptime", "r") as f:
+                return int(float(f.read().split()[0]))
+        except Exception:
+            return 0
+
+
 def get_info():
     info = CoreInfo()
     err = core.core_get_info(ctypes.byref(info))
@@ -40,6 +57,7 @@ def get_info():
         "cpus": info.cpus,
         "page_size": info.page_size,
         "host": info.host.decode("utf-8"),
+        "uptime_s": get_uptime_seconds(),
     }
 
 
