@@ -1,25 +1,25 @@
-#include <windows.h>
 #include "core.h"
+#include <windows.h>
 
 int core_get_info(struct core_info *out) {
-    SYSTEM_INFO si;
-    WCHAR name[MAX_COMPUTERNAME_LENGTH + 1];
-    DWORD len = MAX_COMPUTERNAME_LENGTH + 1;
-
-    if (out == NULL)
-        return ERROR_INVALID_PARAMETER;
-
-    ZeroMemory(out, sizeof *out);
+    if (!out) return -1;
 
     out->pid = GetCurrentProcessId();
-    GetNativeSystemInfo(&si);
-    out->cpus = (int32_t)si.dwNumberOfProcessors;
-    out->page_size = (int32_t)si.dwPageSize;
 
-    if (!GetComputerNameW(name, &len))
-        return (int)GetLastError();
-    if (WideCharToMultiByte(CP_UTF8, 0, name, -1, out->host,
-            sizeof out->host, NULL, NULL) == 0)
-        return (int)GetLastError();
+    SYSTEM_INFO si;
+    GetSystemInfo(&si);
+    out->cpus = si.dwNumberOfProcessors;
+    out->page_size = si.dwPageSize;
+
+    DWORD size = sizeof(out->host) - 1;
+    if (GetComputerNameA(out->host, &size) == 0) {
+        out->host[0] = '\0';
+        return -2;
+    }
+    out->host[size] = '\0';
+
+    DWORD64 ms = GetTickCount64();
+    out->uptime_s = (int64_t)(ms / 1000);
+
     return 0;
 }
