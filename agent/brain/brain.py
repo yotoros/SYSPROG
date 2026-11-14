@@ -3,6 +3,7 @@ import ctypes
 import json
 import os
 import sys
+import urllib.request
 from pathlib import Path
 
 CORE_DIR = Path(__file__).resolve().parent.parent / "core"
@@ -45,3 +46,14 @@ def get_info():
 if __name__ == "__main__":
     message = {"event": "agent_started", "os": sys.platform, **get_info()}
     print(json.dumps(message, ensure_ascii=False, indent=2))
+
+    WEBHOOK_URL = "http://localhost:5678/webhook/d6645e2a-6544-4060-9ebd-92e5af94f832"
+    data = json.dumps(message).encode("utf-8")
+    req = urllib.request.Request(
+        WEBHOOK_URL,
+        data=data,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as resp:
+        print("n8n ответ:", resp.status, resp.read().decode())
