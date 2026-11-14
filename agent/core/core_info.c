@@ -2,13 +2,7 @@
 #include "core.h"
 #include <windows.h>
 
-#ifdef _MSC_VER
-#define EXPORT __declspec(dllexport)
-#else
-#define EXPORT
-#endif
-
-EXPORT int core_get_info(struct core_info *out) {
+int core_get_info(struct core_info *out) {
     if (!out) return -1;
 
     out->pid = GetCurrentProcessId();
