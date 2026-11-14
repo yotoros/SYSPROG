@@ -20,7 +20,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Сообщение агента: {{ $json.body.event }} на компьютере {{ $json.body.host }}. pid={{ $json.body.pid }}, cpus={{ $json.body.cpus }}, page_size={{ $json.body.page_size }}. Напиши по-русски в 2 предложениях что произошло.",
+        "text": "=Ты помощник администратора. Агент прислал данные компьютера в JSON.\nОбъясни простыми словами по-русски в 2-3 предложениях:\n1. Сколько дней и часов работает компьютер без перезагрузки (посчитай сам: uptime_s секунд раздели на 86400 = дни, остаток на 3600 = часы).\n2. Стоит ли его перезагрузить.\nJSON: {{ JSON.stringify($json.body) }}",
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
@@ -58,7 +58,7 @@
         "toEmail": "agent@lab.local",
         "subject": "Отчет агента",
         "emailFormat": "text",
-        "text": "=Событие: {{ $('Webhook').item.json.body.event }}\nХост: {{ $('Webhook').item.json.body.host }}\nPID: {{ $('Webhook').item.json.body.pid }}\n\nОтвет модели:\n{{ $json.text }}",
+        "text": "={{ $json.text }}",
         "options": {}
       },
       "type": "n8n-nodes-base.emailSend",
@@ -112,6 +112,11 @@
           }
         ]
       ]
+    },
+    "Send an Email": {
+      "main": [
+        []
+      ]
     }
   },
   "active": true,
@@ -119,7 +124,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "e519203f-182d-4432-b448-f268f36c45c5",
+  "versionId": "6eecf819-cac7-433e-bf28-fa68bf9b2de5",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "74b3fe61a20c9d3e77e961a094758a21a5f5fab58590c231f799688ecf7c2a89"
