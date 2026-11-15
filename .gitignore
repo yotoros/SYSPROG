@@ -9,6 +9,7 @@ venv/
 *.o
 *.pdb
 *.ilk
+*.dll
 *.so
 *.dylib
 build/
