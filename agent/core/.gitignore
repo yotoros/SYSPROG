@@ -9,3 +9,8 @@ run_child.exe
 run_child.obj
 run_child.lib
 run_child.exp
+cpu_top.exe
+cpu_top.obj
+cpu_top.lib
+cpu_top.exp
+core_cpu.obj

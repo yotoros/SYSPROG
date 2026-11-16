@@ -2,6 +2,7 @@ import ctypes
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.error
 from pathlib import Path
@@ -36,6 +37,13 @@ class CoreChild(ctypes.Structure):
     ]
 
 
+class CoreCpu(ctypes.Structure):
+    _fields_ = [
+        ("user_us", ctypes.c_int64),
+        ("kernel_us", ctypes.c_int64),
+    ]
+
+
 core = ctypes.CDLL(str(CORE / "sentry_core.dll"))
 
 core.core_get_info.argtypes = [ctypes.POINTER(CoreInfo)]
@@ -49,6 +57,9 @@ core.core_spawn.restype = ctypes.c_int
 
 core.core_wait.argtypes = [ctypes.POINTER(CoreChild), ctypes.c_int32, ctypes.POINTER(ctypes.c_int32)]
 core.core_wait.restype = ctypes.c_int
+
+core.core_proc_cpu.argtypes = [ctypes.c_int64, ctypes.POINTER(CoreCpu)]
+core.core_proc_cpu.restype = ctypes.c_int
 
 TOO_SMALL = 122 if sys.platform == "win32" else errno.ERANGE
 
@@ -113,6 +124,28 @@ def wait(child, timeout_ms=-1):
     return code.value
 
 
+def proc_cpu(pid):
+    cpu = CoreCpu()
+    if core.core_proc_cpu(pid, ctypes.byref(cpu)) != 0:
+        return None
+    return cpu.user_us + cpu.kernel_us
+
+
+def cpu_load(interval=1.0):
+    procs = list_procs()
+    before = {p["pid"]: proc_cpu(p["pid"]) for p in procs}
+    start = time.monotonic()
+    time.sleep(interval)
+    after = {p["pid"]: proc_cpu(p["pid"]) for p in procs}
+    wall_us = (time.monotonic() - start) * 1_000_000
+    load = []
+    for p in procs:
+        a, b = before[p["pid"]], after[p["pid"]]
+        if a is not None and b is not None:
+            load.append({"pid": p["pid"], "name": p["name"], "cpu": round((b - a) * 100 / wall_us)})
+    return sorted(load, key=lambda x: x["cpu"], reverse=True)
+
+
 def send(message, url):
     data = json.dumps(message).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
@@ -128,9 +161,11 @@ if __name__ == "__main__":
     procs = list_procs()
     chain = parents(procs, child.pid)
     code = wait(child, 5000)
+    top = cpu_load()[:3]
     message = {"event": "agent_started", "os": sys.platform, **get_info(),
                "procs": len(procs), "child": child.pid, "child_code": code,
-               "parents": [p["name"] for p in chain]}
+               "parents": [p["name"] for p in chain],
+               "top": [{"pid": t["pid"], "name": t["name"], "cpu": t["cpu"]} for t in top]}
     print(json.dumps(message, ensure_ascii=False, indent=2))
     if len(sys.argv) > 1:
         status, body = send(message, sys.argv[1])
