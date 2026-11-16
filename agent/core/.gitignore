@@ -5,3 +5,7 @@
 *.exp
 *.lib
 *.dll
+run_child.exe
+run_child.obj
+run_child.lib
+run_child.exp

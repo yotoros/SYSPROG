@@ -26,7 +26,14 @@ struct core_proc {
     char name[CORE_NAME_MAX];
 };
 
+struct core_child {
+    int64_t pid;
+    int64_t handle;
+};
+
 EXPORT int core_get_info(struct core_info *out);
 EXPORT int core_list_procs(struct core_proc *out, int32_t max, int32_t *count);
+EXPORT int core_spawn(char *const argv[], struct core_child *out);
+EXPORT int core_wait(struct core_child *child, int32_t timeout_ms, int32_t *exit_code);
 
 #endif
