@@ -14,3 +14,8 @@ cpu_top.obj
 cpu_top.lib
 cpu_top.exp
 core_cpu.obj
+count_threads.exe
+count_threads.obj
+count_threads.lib
+count_threads.exp
+core_threads.obj
