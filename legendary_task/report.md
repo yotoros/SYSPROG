@@ -68,7 +68,7 @@ Errors/Skipped: 0` — добирает то, что не смог в прошл
 Шаг 1. Видно: `python processor.py --generate` и подсчёт файлов
 командой `(Get-ChildItem input_orders).Count` — 497 файлов.
 
-![Генерация файлов](screenshots/01_generate.png)
+![Генерация файлов](screenshots/01_generate.PNG)
 
 ### 2. Обработка с заблокированным файлом
 
@@ -77,7 +77,7 @@ Errors/Skipped: 0` — добирает то, что не смог в прошл
 `SKIPPED (file locked): locked_document.txt`, итог
 `Success: 496, Errors/Skipped: 1`. Программа не упала.
 
-![Обработка с блокировкой](screenshots/02_locked.png)
+![Обработка с блокировкой](screenshots/02_locked.PNG)
 
 ### 3. Повторный запуск
 
@@ -85,4 +85,4 @@ Errors/Skipped: 0` — добирает то, что не смог в прошл
 блокировки. В логе `Success: 1, Errors/Skipped: 0` — оставшийся
 файл перенёсся. Повторный запуск безопасен.
 
-![Повторный запуск](screenshots/03_reprocess.png)
+![Повторный запуск](screenshots/03_reprocess.PNG)
